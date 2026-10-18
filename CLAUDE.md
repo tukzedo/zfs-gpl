@@ -15,30 +15,20 @@ This is a clean-room GPLv2+ reimplementation of ZFS. This context is the IMPLEME
 
 - `Instance:` here is always `zfs-gpl-implementation`. The spec environment uses `zfs-gpl-spec`.
 
-- The Instance trailer doubles as clean-room evidence: it records which isolated side authored each commit.
-
-- The remote is the SSH alias `git@github_t00mietum:...`, not literal `github.com`, and it is transport only. Commits before 2026-07-19 were authored as t00mietum. `gh` is authed under my personal account; keep that account out of history and content.
+- The remote is the SSH alias `git@github_t00mietum:...`, not literal `github.com`. `gh` is authed under my personal account; keep that account out of history and content.
 
 ## Build / run
 
-- Rust workspace under `github/`. `cd github && cargo build --release`; `cargo test`; `cargo fmt --all` (rustfmt pinned `hard_tabs = true`).
+- Rust workspace under `github/`. rustfmt pins `hard_tabs = true`, which keeps tab indentation rustfmt-canonical; don't remove it.
 
 - Binary is `zgpl` (never `zpool`/`zfs` - must coexist with OpenZFS).
 
 ## Architecture
 
-- `crates/zfsgpl-ondisk`: on-disk format types/constants, each citing its spec source, no I/O.
-
-- `crates/zfsgpl-core`: SPA (pool/vdev) -> DMU (objects) -> DSL (datasets) -> ZPL (POSIX).
-
-- `crates/zfsgpl-cli`: `zgpl` front end.
+- `zfsgpl-ondisk` holds on-disk types and constants, each citing its spec source, with no I/O. `zfsgpl-core` layers SPA -> DMU -> DSL -> ZPL. `zfsgpl-cli` is the `zgpl` front end.
 
 - Design: `github/project/design.md`. Roadmap: `github/project/backlog.md`.
 
-- Rust conventions: REQUIRED reading every startup/`/clear`, before writing any Rust - `project/design.md` -> "Rust paradigm and conventions" (data-oriented, parse-don't-validate, `no_std` core, unsafe quarantined; and the anti-LLM-tendency rules: no reflexive `.clone()`, no needless alloc, no premature abstraction).
+- Rust conventions: REQUIRED reading every startup/`/clear`, before writing any Rust - `project/design.md` -> "Rust paradigm and conventions".
 
-- Prose and general code/comment/commit style: `style-guide.md` (canonical, human-facing); it points to design.md for the deep Rust paradigm.
-
-## Non-obvious gotchas (all hit during bring-up - don't regress these)
-
-- rustfmt `hard_tabs = true` keeps tab indentation rustfmt-canonical; don't remove it.
+- Prose and general code/comment/commit style: `style-guide.md`.
