@@ -32,6 +32,113 @@ This is a product backlog just for the pre-v1.0.0 release. After that, bugs, fea
 
 ## Issues
 
+- CICD reset: standard flags
+	- ID: 2026102416291700
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- There's no pipeline yet. Add `cicd.bash` with the shared flags, from `--quick` and `--long` to `--backlog-run-quick` and `--merge-gate`, plus `--quiet` and `--message`.
+		- Format check, clippy with `-D warnings`, the tests, release builds, and cross-builds in the default run, which stays under about an hour.
+		- `--merge-gate` from a pre-push hook on `main`, skipped when a push changes only docs. Nothing gates a push to a feature branch.
+		- A backlog run never dogfoods, publishes, commits, or pushes.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+		- Supersedes the old-format "CI/CD pipeline" and Phase 0 "CI: build, test, fmt, clippy" items, for everything but the pre-commit hook.
+		- Supersedes the cross-build cadence in the private notes, which cross-builds only after big changes or every fifth Linux build.
+
+- CICD reset: containers
+	- ID: 2026102416291701
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Build and test in a container from a pinned recipe in the repo, with the Rust toolchain pinned to an exact version. Fall back to the host in one line when docker is missing, and take `--no-container`.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: other hosts and VMs
+	- ID: 2026102416291702
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Run the tests for each target that's built: Windows on `b29w`, FreeBSD on its VM, and Linux arm64 on its VM, through the shared host lock and the VM state helper.
+		- A box that isn't there is a SKIP in its step and in the summary, never a failure. `--no-remote` skips them all.
+		- Each box gets a per-project work folder under its temp root.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: Zig cache
+	- ID: 2026102416291703
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- The arm64 cross-builds are planned through `cargo zigbuild`. Keep the project's Zig caches between runs, and empty a whole one at the end of a run when it's over 2 GB or was filled by another Zig version.
+		- The container mounts a volume of its own for Zig's global cache, under the same rule. The shared one on the host is never touched.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: container cleanup
+	- ID: 2026102416291704
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Label, name, and `--rm` every container, and remove the run's containers, the project's stale images, and old build cache by label at the end of a run, per the shared CICD rules.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: CPU and priority
+	- ID: 2026102416291705
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Work out one job count from the CPU count and load, and pass it to cargo, the test threads, and the container's CPU cap. Run at low priority, and at a quarter of the CPUs for the sanitizer and Miri runs.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: step output
+	- ID: 2026102416291706
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Use the numbered Starting and PASS or FAIL step lines with the section rule, list turned-off steps first, and end with a blank line.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: a test for every Done item
+	- ID: 2026102416291707
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Each Done item names its test, or says in a few words why it has none.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: test IDs
+	- ID: 2026102416291708
+	- Type: Task
+	- Status: Queued
+	- Priority: High
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Give each test a base 32 minute ID from its first commit, and print one PASS, FAIL, or SKIP line per test with it.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
 - Run on the last Core 2 Duo, and AMD CPUs from that era.
 	- ID: 2026101301161891
 	- Type: Enhancement
@@ -50,6 +157,56 @@ This is a product backlog just for the pre-v1.0.0 release. After that, bugs, fea
 	- Progress log:
 		- 20261013: Rust builds for plain x86-64 by default, and nothing here sets `target-cpu`. Keep `target-cpu=native` out of the release profile. Checksum (fletcher4, SHA-256) and compression fast paths go through `is_x86_feature_detected!`.
 
+- CICD reset: temp files and safe removal
+	- ID: 2026102416291709
+	- Type: Task
+	- Status: Queued
+	- Priority: Avg
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- Put each run's temp folder under the shared layout, with `TMPDIR` pointed there, a cleanup trap, and pruning of the project's own stale runs. Remove through a copy of the shared guard.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: version line
+	- ID: 2026102416291710
+	- Type: Task
+	- Status: Queued
+	- Priority: Avg
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- `zgpl` has no `--version`. Add one with the version from `Cargo.toml`, the build number from the commit time, and the date on a non-release build.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
+- CICD reset: macOS runner
+	- ID: 2026102416291711
+	- Type: Task
+	- Status: Queued
+	- Priority: Avg
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- macOS builds wait on a Mac. Once the repo is public, build and run the tests on GitHub's free arm64 macOS runner, and smoke-test `zgpl` there.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+		- Supersedes "macOS is deferred" in the cross-build cadence in the private notes.
+
+- CICD reset: CICD process gaps
+	- ID: 2026102416291712
+	- Type: Task
+	- Status: Queued
+	- Priority: Avg
+	- Opened: 20261024-162917
+	- Opened by: CICD reset
+	- Requirements:
+		- The Rust leak checks: AddressSanitizer and LeakSanitizer on a pinned nightly, Miri, and the clippy `mem_forget` and `undocumented_unsafe_blocks` lints.
+		- `cargo deny` advisories, and pinned helper versions in one place.
+		- Fuzz the nvlist decoder and the label and uberblock parsers.
+		- Lint output kept with rotation and a `--check` gate.
+		- Sync from remote before a run.
+		- Packaging and checksums once there's a release.
+		- Sweeping override, 2026-10-24: this supersedes any earlier decision on this project that conflicts with it.
+
 ## Old format
 
 ### Bugs
@@ -58,6 +215,7 @@ This is a product backlog just for the pre-v1.0.0 release. After that, bugs, fea
 
 - Build, CI/CD, and install
 	- 🔘 A CI/CD pipeline kicked off by a bash script (`cicd/cicd.bash`): builds, tests, and can commit and push. Packaging and publishing are opt-in.
+		- 2026-10-24: superseded by 2026102416291700 and the other `CICD reset` items.
 	- 🔘 Dev-environment install script (Linux bash, macOS sh, Windows PowerShell), runnable via a single `curl`/`wget`. Clones main, installs dependencies, and states what it will do with an option to abort.
 	- 🔘 Release-install script per platform, runnable via a single `curl`/`wget`. Downloads, installs, and runs the latest release, with an option to abort.
 
@@ -77,6 +235,7 @@ This is a product backlog just for the pre-v1.0.0 release. After that, bugs, fea
 		- ✅ Design and backlog docs
 		- ✅ Set up the spec repo (`zfs-gpl-spec`) and wire the dirty tree with its own role-constraining context (`DIRTY-SIDE.md`, openzfs pinned)
 		- 🔘 CI: build, test, fmt, clippy (the clone-detection tripwire runs spec-side, not here - see Phase 1)
+			- 2026-10-24: superseded by 2026102416291700 and the other `CICD reset` items.
 		- 🔘 rustfmt/clippy pre-commit hook
 
 - Phase 1 - legal groundwork (parallel, some for counsel)
